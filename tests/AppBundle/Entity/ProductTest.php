@@ -13,16 +13,34 @@ use PHPUnit\Framework\TestCase;
 
 class ProductTest extends TestCase
 {
-    public function testcompteTVAFoodProduct()
+    /**
+     * @dataProvider pricesForFoodProduct
+     */
+    public function testcompteTVAFoodProduct($price, $expectedTva)
     {
-        $product = new Product('Un produit', Product::FOOD_PRODUCT, 20);
-        $this->assertSame(1.1, $product->compteTVA());
+        $product = new Product('Un produit', Product::FOOD_PRODUCT, $price);
+        $this->assertSame($expectedTva, $product->compteTVA());
     }
 
+    public function pricesForFoodProduct()
+    {
+        return [
+            [0, 0.0],
+            [20, 1.1],
+            [100, 5.5]
+        ];
+    }
     public function testcompteTVAOtherProduct()
     {
         $product = new Product('Un produit', 'Autre type de produit', 20);
         $this->assertSame(3.92, $product->compteTVA());
+    }
+
+    public function testNegativePriceComputeTVA()
+    {
+        $product = new Product('Un produit', Product::FOOD_PRODUCT, -20);
+        $this->expectException('LogicException');
+        $product->compteTVA();
     }
 
 }
